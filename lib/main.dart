@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'src/article.dart';
+import 'package:http/http.dart' as http;
 
 void main() => runApp(MyApp());
 
@@ -28,7 +29,42 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<Article> _articles = articles;
+  List<int> _ids = [
+    19588996,
+    19583384,
+    19584921,
+    19584540,
+    19588852,
+    19584005,
+    19585033,
+    19588017,
+    19588744,
+    19584509,
+    19588395,
+    19585174,
+    19588961,
+    19582774,
+    19584440,
+    19561274,
+    19581721,
+    19577832,
+    19567962,
+    19585640,
+    19586219,
+    19588812,
+    19587782,
+    19583531
+  ];
+
+  Future<Article> _getArticle(int id) async {
+    final storyUrl = 'https://hacker-news.firebaseio.com/v0/item/${id}.json';
+        final storyRes = await http.get(storyUrl);
+
+        if (storyRes.statusCode == 200) {
+          return parseArticle(storyRes.body);
+        }
+      return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,13 +72,17 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: RefreshIndicator(
-        child: ListView(
-          children: _articles.map(_buildItem).toList(),
-        ),
-        onRefresh: () async {
-          return Future.delayed(const Duration(seconds: 2));
-        },
+      body: ListView(
+        children: _ids.map((i) => FutureBuilder<Article>(
+          future: _getArticle(i),
+          builder: (BuildContext context, AsyncSnapshot<Article> snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return _buildItem(snapshot.data);
+            } else {
+              return Center(child: CircularProgressIndicator());
+            }
+          },)
+        ).toList(),
       ),
     );
   }
@@ -52,18 +92,17 @@ class _MyHomePageState extends State<MyHomePage> {
         key: Key(article.text),
         padding: const EdgeInsets.all(8.0),
         child: ExpansionTile(
-          title: Text(article.text, style: new TextStyle(fontSize: 24.0)),
+          title: Text(article.title, style: new TextStyle(fontSize: 24.0)),
           children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                Text("${article.commentsCount} comments"),
+                Text('${article.descendants} comments'),
                 IconButton(
                   icon: Icon(Icons.launch),
                   onPressed: () async {
-                    final url = "http://${article.url}";
-                    if (await canLaunch(url)) {
-                      await launch(url, forceWebView: true);
+                    if (await canLaunch(article.url)) {
+                      await launch(article.url, forceWebView: true);
                     }
                   },
                   color: Theme.of(context).accentColor,
