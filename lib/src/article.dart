@@ -1,6 +1,6 @@
 class Article {
   final String text;
-  final String domain;
+  final String url;
   final String by;
   final String age;
   final int score;
@@ -8,18 +8,31 @@ class Article {
 
   const Article({
     this.text,
-    this.domain,
+    this.url,
     this.by,
     this.age,
     this.score,
     this.commentsCount
   });
+
+  factory Article.fromJson(Map<String, dynamic> json) {
+    if (json == null)
+      return null;
+
+    return Article(
+      text: json['text'] ?? '[null]',
+      url: json['url'],
+      by: json['by'],
+      age: json['age'] ?? 0,
+      score: json['score'] ?? 0
+    );
+  }
 }
 
 final articles = [
   new Article(
     text: "Article One",
-    domain: "wiley.com",
+    url: "wiley.com",
     by: "zdw",
     age: "2 days",
     score: 100,
@@ -27,7 +40,7 @@ final articles = [
   ),
   new Article(
     text: "Article Two",
-    domain: "wiley.com",
+    url: "wiley.com",
     by: "Amber",
     age: "2 days",
     score: 120,
@@ -35,7 +48,7 @@ final articles = [
   ),
   new Article(
     text: "Article Three",
-    domain: "wiley.com",
+    url: "wiley.com",
     by: "oscar",
     age: "4 days",
     score: 80,
