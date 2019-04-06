@@ -13,9 +13,9 @@ void main() {
 
     final article = parseArticle(jsonString);
     expect(article.by, "dhouston");
-    expect(article.text, "My YC app: Dropbox - Throw away your USB drive");
+    expect(article.title, "My YC app: Dropbox - Throw away your USB drive");
     expect(article.url, "http://www.getdropbox.com/u/2/screencast.html");
     expect(article.score, 104);
-    expect(article.timestamp, 1175714200);
+    expect(article.time, 1175714200);
   });
 }
