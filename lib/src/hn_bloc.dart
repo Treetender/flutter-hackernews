@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 
 class HackerNewsBloc {
 
-  Stream<List<Article>> get articles => _articlesSubject.stream;
+  Stream<UnmodifiableListView<Article>> get articles => _articlesSubject.stream;
 
   final _articlesSubject = BehaviorSubject<UnmodifiableListView<Article>>();
 
