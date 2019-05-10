@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:hackernews/src/hn_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'src/article.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert' as json;
+import 'package:collection/collection.dart';
+import 'package:hackernews/src/article.dart';
 
-void main() => runApp(MyApp());
+
+void main() {
+  final hnBloc = HackerNewsBloc(); 
+  runApp(MyApp(bloc: hnBloc));
+}
 
 class MyApp extends StatelessWidget {
+  final HackerNewsBloc bloc;
+
+  MyApp({
+    Key key,
+    this.bloc,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -15,13 +26,15 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         brightness: Brightness.dark,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter Demo Home Page', bloc: this.bloc),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  final HackerNewsBloc bloc;
+
+  MyHomePage({Key key, this.title, this.bloc}) : super(key: key);
 
   final String title;
 
@@ -30,29 +43,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<int> _ids = [];
-
-  Future<Article> _getArticle(int id) async {
-    final storyUrl = 'https://hacker-news.firebaseio.com/v0/item/$id.json';
-    final storyRes = await http.get(storyUrl);
-
-    if (storyRes.statusCode == 200) {
-      return parseArticle(storyRes.body);
-    }
-    return null;
-  }
-
-  Future<void> _getTopStoryIds() async {
-    final idsUrl = 'https://hacker-news.firebaseio.com/v0/topstories.json';
-    final idsRes = await http.get(idsUrl);
-
-    if (idsRes.statusCode == 200) {
-      var ids = List<int>.from(json.jsonDecode(idsRes.body));
-      setState(() {
-        _ids = ids;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,24 +50,13 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: RefreshIndicator(
-        onRefresh: _getTopStoryIds,
-        child: ListView(
-          children: _ids
-              .map((i) => FutureBuilder<Article>(
-                    future: _getArticle(i),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<Article> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done) {
-                        return _buildItem(snapshot.data);
-                      } else {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                    },
-                  ))
-              .toList(),
+      body: StreamBuilder<UnmodifiableListView<Article>>(
+        stream: widget.bloc.articles,
+        initialData: UnmodifiableListView<Article>([]),
+        builder: (context, snapshot) => ListView(
+          children: snapshot.data.map(_buildItem).toList()
         ),
-      ),
+      )
     );
   }
 

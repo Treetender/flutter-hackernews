@@ -17,43 +17,58 @@ abstract class Article implements Built<Article, ArticleBuilder> {
 
   static Serializer<Article> get serializer => _$articleSerializer;
 
-  int get id;	//The item's unique id.
+  ///The item's unique id.
+  int get id;	
   
+  ///true if the item is deleted.
   @nullable
-  bool get deleted; //true if the item is deleted.
+  bool get deleted; 
   
-  String get type; //e	The type of item. One of "job", "story", "comment", "poll", or "pollopt".
+  ///The type of item. One of "job", "story", "comment", "poll", or "pollopt"
+  String get type;
   
-  String get by; //	The username of the item's author.
+  ///	The username of the item's author.
+  String get by; 
   
-  int get time; //	Creation date of the item, in Unix Time.
+  ///	Creation date of the item, in Unix Time.
+  int get time; 
   
+  ///	The comment, story or poll text. HTML.
   @nullable
-  String get text; //	The comment, story or poll text. HTML.
+  String get text; 
   
+  //	true if the item is dead.
   @nullable
-  bool get dead; //	true if the item is dead.
+  bool get dead; 
   
+  ///	The comment's parent: either another comment or the relevant story.
   @nullable
-  int get parent; //	The comment's parent: either another comment or the relevant story.
+  int get parent; 
   
+  ///The pollopt's associated poll.
   @nullable
-  int get poll;	//The pollopt's associated poll.
+  int get poll;	
   
-  BuiltList<int> get kids; //	The ids of the item's comments, in ranked display order.
+  ///	The ids of the item's comments, in ranked display order.
+  BuiltList<int> get kids; 
   
+  /// The URL of the story.
   @nullable
-  String get url; //	The URL of the story.
+  String get url; 
   
-  int get score; //	The story's score, or the votes for a pollopt.
+  ///The story's score, or the votes for a pollopt.
+  int get score; 
   
+  ///	The title of the story, poll or job.
   @nullable
-  String get title; //	The title of the story, poll or job.
+  String get title; 
   
-  BuiltList<int> get parts; //	A list of related pollopts, in display order.
+  ///	A list of related pollopts, in display order.
+  BuiltList<int> get parts; 
   
+  ///	In the case of stories or polls, the total comment count.
   @nullable
-  int get descendants; //	In the case of stories or polls, the total comment count.
+  int get descendants; 
 
   Article._();
   factory Article([updates(ArticleBuilder b)]) = _$Article;
