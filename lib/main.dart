@@ -44,6 +44,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  var _selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,16 +59,24 @@ class _MyHomePageState extends State<MyHomePage> {
           children: snapshot.data.map(_buildItem).toList()
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(currentIndex: 0,
+      bottomNavigationBar: BottomNavigationBar(currentIndex: _selectedIndex,
         items: [
           BottomNavigationBarItem(title: Text('Top Stories'), icon: Icon(Icons.priority_high)),
           BottomNavigationBarItem(title: Text('New Stories'), icon: Icon(Icons.new_releases))
         ],
         onTap: (index) {
-          if (index == 0)
-            print('Top Stories Tapped');
-          else 
-            print('New Stories Tapped');
+          if (index == 0) {
+            widget.bloc.storiesType.add(StoriesType.topStories);
+            setState(() {
+              _selectedIndex = 0;
+            });
+          }
+          else {
+            widget.bloc.storiesType.add(StoriesType.newStories);
+            setState(() {
+              _selectedIndex = 1;
+            });
+          }
         },
       ),
     );
