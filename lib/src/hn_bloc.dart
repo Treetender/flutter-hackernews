@@ -12,9 +12,11 @@ enum StoriesType {
 
 class HackerNewsBloc {
 
+  Stream<bool> get isLoading => _isLoadingSubject.stream;
   Sink<StoriesType> get storiesType => _storiesTypeController.sink;
   Stream<UnmodifiableListView<Article>> get articles => _articlesSubject.stream;
-
+  
+  final _isLoadingSubject = BehaviorSubject<bool>(seedValue: false);
   final _articlesSubject = BehaviorSubject<UnmodifiableListView<Article>>();
   final _storiesTypeController = StreamController<StoriesType>();
 
@@ -30,6 +32,12 @@ class HackerNewsBloc {
           _getArticlesAndUpdate(_topIds);
         }
     });
+  }
+
+  void dispose() {
+    _storiesTypeController.close();
+    _isLoadingSubject.close();
+    _articlesSubject.close();
   }
 
   static List<int> _newIds = [
@@ -48,10 +56,12 @@ class HackerNewsBloc {
     17392455
   ];
 
-  _getArticlesAndUpdate(List<int> ids) {
-    _getArticles(ids).then((_) {
-      _articlesSubject.add(UnmodifiableListView(_articles));
-    });
+  _getArticlesAndUpdate(List<int> ids) async {
+    _isLoadingSubject.add(true);
+    await _getArticles(ids);
+    await Future.delayed(Duration(seconds: 1));
+    _articlesSubject.add(UnmodifiableListView(_articles));
+    _isLoadingSubject.add(false);
   }
 
   Future<Null> _getArticles(List<int> ids) async {

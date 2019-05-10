@@ -3,10 +3,10 @@ import 'package:hackernews/src/hn_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:collection/collection.dart';
 import 'package:hackernews/src/article.dart';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() {
-  final hnBloc = HackerNewsBloc(); 
+  final hnBloc = HackerNewsBloc();
   runApp(MyApp(bloc: hnBloc));
 }
 
@@ -43,7 +43,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   var _selectedIndex = 0;
 
   @override
@@ -51,32 +50,42 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        leading: StreamBuilder<bool>(
+            stream: widget.bloc.isLoading,
+            builder: (context, snapshot) {
+              return !snapshot.data
+                  ? Icon(FontAwesomeIcons.hackerNewsSquare)
+                  : Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColorLight),
+                      ),
+                    );
+            }),
       ),
       body: StreamBuilder<UnmodifiableListView<Article>>(
         stream: widget.bloc.articles,
         initialData: UnmodifiableListView<Article>([]),
-        builder: (context, snapshot) => ListView(
-          children: snapshot.data.map(_buildItem).toList()
-        ),
+        builder: (context, snapshot) =>
+            ListView(children: snapshot.data.map(_buildItem).toList()),
       ),
-      bottomNavigationBar: BottomNavigationBar(currentIndex: _selectedIndex,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
         items: [
-          BottomNavigationBarItem(title: Text('Top Stories'), icon: Icon(Icons.priority_high)),
-          BottomNavigationBarItem(title: Text('New Stories'), icon: Icon(Icons.new_releases))
+          BottomNavigationBarItem(
+              title: Text('Top Stories'), icon: Icon(Icons.priority_high)),
+          BottomNavigationBarItem(
+              title: Text('New Stories'), icon: Icon(Icons.new_releases))
         ],
         onTap: (index) {
           if (index == 0) {
             widget.bloc.storiesType.add(StoriesType.topStories);
-            setState(() {
-              _selectedIndex = 0;
-            });
-          }
-          else {
+          } else {
             widget.bloc.storiesType.add(StoriesType.newStories);
-            setState(() {
-              _selectedIndex = 1;
-            });
           }
+          setState(() {
+            _selectedIndex = index;
+          });
         },
       ),
     );
