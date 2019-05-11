@@ -50,18 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        leading: StreamBuilder<bool>(
-            stream: widget.bloc.isLoading,
-            builder: (context, snapshot) {
-              return !snapshot.data
-                  ? Icon(FontAwesomeIcons.hackerNewsSquare)
-                  : Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColorLight),
-                      ),
-                    );
-            }),
+        leading: LoadingInfo(widget.bloc.isLoading),
       ),
       body: StreamBuilder<UnmodifiableListView<Article>>(
         stream: widget.bloc.articles,
@@ -115,5 +104,46 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ));
+  }
+}
+
+class LoadingInfo extends StatefulWidget {
+  final Stream<bool> _isLoading;
+
+  LoadingInfo(this._isLoading);
+
+  @override
+  _LoadingInfoState createState() => _LoadingInfoState();
+}
+
+class _LoadingInfoState extends State<LoadingInfo>
+    with TickerProviderStateMixin {
+  AnimationController _controller;
+
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: widget._isLoading,
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          if (snapshot.hasData && snapshot.data) {
+            _controller.repeat(reverse: true);
+            
+          }
+          else {
+          _controller.forward();
+          }
+          return FadeTransition(
+              child: Icon(FontAwesomeIcons.hackerNews),
+              opacity: _controller,
+          );
+        });
   }
 }

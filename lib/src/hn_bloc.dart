@@ -59,7 +59,7 @@ class HackerNewsBloc {
   _getArticlesAndUpdate(List<int> ids) async {
     _isLoadingSubject.add(true);
     await _getArticles(ids);
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(Duration(seconds: 3));
     _articlesSubject.add(UnmodifiableListView(_articles));
     _isLoadingSubject.add(false);
   }
