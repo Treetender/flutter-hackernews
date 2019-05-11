@@ -23,8 +23,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        brightness: Brightness.dark,
+        primarySwatch: Colors.deepOrange,
       ),
       home: MyHomePage(title: 'Flutter Hacker News', bloc: this.bloc),
     );
@@ -135,14 +134,13 @@ class _LoadingInfoState extends State<LoadingInfo>
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.hasData && snapshot.data) {
             _controller.repeat(reverse: true);
-            
-          }
-          else {
-          _controller.forward();
+          } else {
+            _controller.forward();
           }
           return FadeTransition(
-              child: Icon(FontAwesomeIcons.hackerNews),
-              opacity: _controller,
+            child: Icon(FontAwesomeIcons.hackerNews),
+            opacity: Tween(begin: 0.25, end: 1.0).animate(
+                CurvedAnimation(curve: Curves.easeIn, parent: _controller)),
           );
         });
   }

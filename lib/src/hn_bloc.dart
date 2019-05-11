@@ -23,15 +23,15 @@ class HackerNewsBloc {
   var _articles = <Article>[];
 
   HackerNewsBloc() {
-    _getArticlesAndUpdate(_topIds);
+    _initializeArticles();
 
-    _storiesTypeController.stream.listen((storiesType) {
-        if(storiesType == StoriesType.newStories) {
-          _getArticlesAndUpdate(_newIds);
-        } else {
-          _getArticlesAndUpdate(_topIds);
-        }
+    _storiesTypeController.stream.listen((storiesType) async {
+      _getArticlesAndUpdate(await _getIds(storiesType));
     });
+  }
+
+  Future<void> _initializeArticles() async {
+    _getArticlesAndUpdate(await _getIds(StoriesType.topStories));
   }
 
   void dispose() {
@@ -40,26 +40,25 @@ class HackerNewsBloc {
     _articlesSubject.close();
   }
 
-  static List<int> _newIds = [
-    17392995,
-    17397852,
-    17395342,
-    17385291,
-    17395675,
+  static const _baseUrl = "https://hacker-news.firebaseio.com/v0/";
 
-  ];
+  Future<List<int>> _getIds(StoriesType type) async {
+     final partUrl = type == StoriesType.topStories ? 'top' : 'new'; 
+     final url = "$_baseUrl${partUrl}stories.json";
 
-  static List<int> _topIds = [
-    17387438,
-    17393560,
-    17391971,
-    17392455
-  ];
+     final response = await http.get(url);
+
+     if(response.statusCode != 200) {
+       throw HackerNewsApiError('Failed to get $partUrl stories');
+     }
+
+     return parseTopStories(response.body);
+
+  }
 
   _getArticlesAndUpdate(List<int> ids) async {
     _isLoadingSubject.add(true);
     await _getArticles(ids);
-    await Future.delayed(Duration(seconds: 3));
     _articlesSubject.add(UnmodifiableListView(_articles));
     _isLoadingSubject.add(false);
   }
@@ -77,7 +76,13 @@ class HackerNewsBloc {
     if (storyRes.statusCode == 200) {
       return parseArticle(storyRes.body);
     }
-    return null;
+    throw HackerNewsApiError('Failed to get artcile $id');
   }
 
+}
+
+class HackerNewsApiError extends Error {
+  final String message;
+
+  HackerNewsApiError(this.message);
 }

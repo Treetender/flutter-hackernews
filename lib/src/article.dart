@@ -25,6 +25,7 @@ abstract class Article implements Built<Article, ArticleBuilder> {
   bool get deleted; 
   
   ///The type of item. One of "job", "story", "comment", "poll", or "pollopt"
+  @nullable
   String get type;
   
   ///	The username of the item's author.
