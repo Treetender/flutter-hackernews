@@ -11,14 +11,14 @@ enum StoriesType {
 }
 
 class HackerNewsBloc {
-
   Stream<bool> get isLoading => _isLoadingSubject.stream;
   Sink<StoriesType> get storiesType => _storiesTypeController.sink;
   Stream<UnmodifiableListView<Article>> get articles => _articlesSubject.stream;
-  
+
   final _isLoadingSubject = BehaviorSubject<bool>(seedValue: false);
   final _articlesSubject = BehaviorSubject<UnmodifiableListView<Article>>();
   final _storiesTypeController = StreamController<StoriesType>();
+  final _cachedArticles = HashMap<int, Article>();
 
   var _articles = <Article>[];
 
@@ -43,17 +43,16 @@ class HackerNewsBloc {
   static const _baseUrl = "https://hacker-news.firebaseio.com/v0/";
 
   Future<List<int>> _getIds(StoriesType type) async {
-     final partUrl = type == StoriesType.topStories ? 'top' : 'new'; 
-     final url = "$_baseUrl${partUrl}stories.json";
+    final partUrl = type == StoriesType.topStories ? 'top' : 'new';
+    final url = "$_baseUrl${partUrl}stories.json";
 
-     final response = await http.get(url);
+    final response = await http.get(url);
 
-     if(response.statusCode != 200) {
-       throw HackerNewsApiError('Failed to get $partUrl stories');
-     }
+    if (response.statusCode != 200) {
+      throw HackerNewsApiError('Failed to get $partUrl stories');
+    }
 
-     return parseTopStories(response.body);
-
+    return parseTopStories(response.body);
   }
 
   _getArticlesAndUpdate(List<int> ids) async {
@@ -64,21 +63,24 @@ class HackerNewsBloc {
   }
 
   Future<Null> _getArticles(List<int> ids) async {
-     final futureArticles = ids.map((id) => _getArticle(id));
-     final articles = await Future.wait(futureArticles);
-     _articles = articles;
+    final futureArticles = ids.map((id) => _getArticle(id));
+    final articles = await Future.wait(futureArticles);
+    _articles = articles;
   }
 
   Future<Article> _getArticle(int id) async {
-    final storyUrl = 'https://hacker-news.firebaseio.com/v0/item/$id.json';
-    final storyRes = await http.get(storyUrl);
+    if (!_cachedArticles.containsKey(id)) {
+      final storyUrl = '$_baseUrl/item/$id.json';
+      final storyRes = await http.get(storyUrl);
 
-    if (storyRes.statusCode == 200) {
-      return parseArticle(storyRes.body);
+      if (storyRes.statusCode == 200) {
+        _cachedArticles[id] = parseArticle(storyRes.body);
+      } else {
+        throw HackerNewsApiError('Failed to get artcile $id');
+      }
     }
-    throw HackerNewsApiError('Failed to get artcile $id');
+    return _cachedArticles[id];
   }
-
 }
 
 class HackerNewsApiError extends Error {

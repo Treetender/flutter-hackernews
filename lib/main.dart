@@ -89,6 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
+                if (article.type != null) Text('${article.type}'),
                 Text('${article.descendants} comments'),
                 IconButton(
                   icon: Icon(Icons.launch),
@@ -135,7 +136,7 @@ class _LoadingInfoState extends State<LoadingInfo>
           if (snapshot.hasData && snapshot.data) {
             _controller.repeat(reverse: true);
           } else {
-            _controller.forward();
+            return Container();
           }
           return FadeTransition(
             child: Icon(FontAwesomeIcons.hackerNews),
