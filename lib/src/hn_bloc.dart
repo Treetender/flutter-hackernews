@@ -40,11 +40,11 @@ class HackerNewsBloc {
     _articlesSubject.close();
   }
 
-  static const _baseUrl = "https://hacker-news.firebaseio.com/v0/";
+  static const _baseUrl = "https://hacker-news.firebaseio.com/v0";
 
   Future<List<int>> _getIds(StoriesType type) async {
     final partUrl = type == StoriesType.topStories ? 'top' : 'new';
-    final url = "$_baseUrl${partUrl}stories.json";
+    final url = "$_baseUrl/${partUrl}stories.json";
 
     final response = await http.get(url);
 
@@ -65,7 +65,7 @@ class HackerNewsBloc {
   Future<Null> _getArticles(List<int> ids) async {
     final futureArticles = ids.map((id) => _getArticle(id));
     final articles = await Future.wait(futureArticles);
-    _articles = articles;
+    _articles = articles.where((article) => article != null).toList();
   }
 
   Future<Article> _getArticle(int id) async {
