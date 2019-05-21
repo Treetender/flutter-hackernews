@@ -18,13 +18,19 @@ class MyApp extends StatelessWidget {
     this.bloc,
   }) : super(key: key);
 
+  static const primaryColor = Colors.white;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.deepOrange,
-      ),
+          primaryColor: primaryColor,
+          scaffoldBackgroundColor: primaryColor,
+          canvasColor: Colors.black,
+          textTheme: Theme.of(context).textTheme.copyWith(
+              caption: TextStyle(color: Colors.white54),
+              subhead: TextStyle(fontFamily: 'Garamond', fontSize: 10.0))),
       home: MyHomePage(title: 'Flutter Hacker News', bloc: this.bloc),
     );
   }
@@ -48,8 +54,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
         leading: LoadingInfo(widget.bloc.isLoading),
+        elevation: 0.0,
       ),
       body: StreamBuilder<UnmodifiableListView<Article>>(
         stream: widget.bloc.articles,
@@ -82,25 +88,30 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _buildItem(Article article) {
     return Padding(
         key: Key(article.text),
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 12.0),
         child: ExpansionTile(
           title: Text(article.title, style: new TextStyle(fontSize: 24.0)),
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                if (article.type != null) Text('${article.type}'),
-                Text('${article.descendants} comments'),
-                IconButton(
-                  icon: Icon(Icons.launch),
-                  onPressed: () async {
-                    if (await canLaunch(article.url)) {
-                      await launch(article.url, forceWebView: true);
-                    }
-                  },
-                  color: Theme.of(context).accentColor,
-                )
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Text('${article.descendants} comments'),
+                  SizedBox(
+                    width: 16.0,
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.launch),
+                    onPressed: () async {
+                      if (await canLaunch(article.url)) {
+                        await launch(article.url, forceWebView: true);
+                      }
+                    },
+                    color: Theme.of(context).accentColor,
+                  )
+                ],
+              ),
             ),
           ],
         ));
@@ -136,7 +147,7 @@ class _LoadingInfoState extends State<LoadingInfo>
           if (snapshot.hasData && snapshot.data) {
             _controller.repeat(reverse: true);
           } else {
-            return Container();
+            return Icon(FontAwesomeIcons.hackerNews);
           }
           return FadeTransition(
             child: Icon(FontAwesomeIcons.hackerNews),
