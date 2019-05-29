@@ -35,6 +35,12 @@ class MyApp extends StatelessWidget {
           textTheme: Theme.of(context).textTheme.copyWith(
               caption: TextStyle(color: Colors.white54),
               subhead: TextStyle(fontFamily: 'Garamond', fontSize: 10.0))),
+      darkTheme: ThemeData(
+        textTheme: Theme.of(context).textTheme.copyWith(
+            caption: TextStyle(color: Colors.white54),
+            subhead: TextStyle(fontFamily: 'Garamond', fontSize: 10.0)),
+        brightness: Brightness.dark,
+      ),
       home: MyHomePage(title: 'Flutter Hacker News', bloc: this.bloc),
     );
   }
